@@ -14,7 +14,7 @@ This function computes the uptime and downtime for a each store based on its ava
 
 - If the timestamp is older than the current hour, it updates the uptime and downtime for the last hour, and updates the downtime for the day and week.
 
-If the store was inactive during the business hours, it also updates the downtime for the current hour, day, and week based on the available timestamps.
+- If the store was inactive during the business hours, it also updates the downtime for the current hour, day, and week based on the available timestamps.
 
 - If the timestamp is from the current day, it updates the downtime and uptime for the day.
 
