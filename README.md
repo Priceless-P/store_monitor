@@ -1,5 +1,7 @@
 # store_monitor
 
+Due to limited database storage, all the `store_status.csv` data was not uploaded
+
 ## Compute_uptime_downtime logic
 
 This function computes the uptime and downtime for a each store based on its available timestamp data(timstamps that fall within the business hours). The function iterates through the timestamps for each store and calculates the uptime and downtime in the last hour, day, and week.
@@ -19,3 +21,4 @@ This function computes the uptime and downtime for a each store based on its ava
 - If the timestamp is from the current day, it updates the downtime and uptime for the day.
 
 - If the timestamp is from the last week, it updates the downtime and uptime for the week.
+
