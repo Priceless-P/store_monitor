@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, Column, Integer, String, DateTime, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-database_url = "postgresql+psycopg2://wpdnwwtb:cFlMv1ea-WkkH2AuYLKe7ywr7TiCWXU3@heffalump.db.elephantsql.com/wpdnwwtb"
+database_url = "postgresql+psycopg2://password@username.db.elephantsql.com/dbname"
 database_engine = create_engine(database_url, client_encoding='utf8', echo=True)
 
 Session = sessionmaker(bind=database_engine)
@@ -70,7 +70,8 @@ def get_max_timestamp():
 def get_all_stores():
     query = text('SELECT store_id FROM store_timezone')
     df = pd.read_sql_query(query, con=database_engine)
-    return df
+    stores = df['store_id'].tolist()
+    return stores
 
 
 def get_times(store_id):

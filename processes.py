@@ -82,9 +82,8 @@ def compute_uptime_downtime(store_id):
     business_hours = get_business_hours(store_id)
     timestamps = get_available_timestamps(store_id)
     current_time = datetime.now().time()
-    current_day = datetime.now().weekday()
+    current_day = datetime.now()
 
-    # Set initial values for uptime and downtime
     # Initialize uptime and downtime variables
     uptime_last_hour = 0
     downtime_last_hour = 0
@@ -102,19 +101,18 @@ def compute_uptime_downtime(store_id):
         timestamp_time = timestamp[0].time()
         timestamp_day = timestamp[0].weekday()
         if business_hours[str(timestamp_day)][0] <= timestamp_time <= business_hours[str(timestamp_day)][1]:
-            if timestamp[1] == 'active':
-                if timestamp[0].hour == current_time.hour:
-                    if current_time < business_hours[str(current_day)][0] or current_time > \
-                            business_hours[str(current_day)][1]:
-                        # Store is in downtime for the current hour
-                        downtime_last_hour += 60
-                    elif one_hour_ago <= timestamp_time <= current_time:
-                        # Store has been active in the last hour
-                        uptime_last_hour += (current_time.minute - timestamp_time.minute)
-                        downtime_last_day += (datetime.combine(date.today(), current_time) - datetime.combine(
-                            date.today(), timestamp_time)).seconds / 3600
-                        downtime_last_week += (datetime.combine(date.today(), current_time) - datetime.combine(
-                            date.today(), timestamp_time)).seconds / 3600
+            if timestamp[0].hour == current_time.hour:
+                if current_time < business_hours[str(current_day.weekday())][0] or current_time > \
+                        business_hours[str(current_day.weekday())][1]:
+                    # Store is in downtime for the current hour
+                    downtime_last_hour += 60
+                elif one_hour_ago <= timestamp[0] <= datetime.now():
+                    # Store has been active in the last hour
+                    uptime_last_hour += (current_time.minute - timestamp_time.minute)
+                    downtime_last_day += (datetime.combine(date.today(), current_time) - datetime.combine(
+                        date.today(), timestamp_time)).seconds / 3600
+                    downtime_last_week += (datetime.combine(date.today(), current_time) - datetime.combine(
+                        date.today(), timestamp_time)).seconds / 3600
                 elif timestamp[0].hour < current_time.hour:
                     # Store has been active in the last hour
                     uptime_last_hour += 60
@@ -124,27 +122,29 @@ def compute_uptime_downtime(store_id):
                     downtime_last_week += (datetime.combine(date.today(),
                                                             business_hours[str(timestamp_day)][1]) - datetime.combine(
                         date.today(), timestamp_time)).seconds / 3600
-            else:
-                if timestamp[0].hour == current_time.hour:
-                    # Store is in downtime for the current hour
-                    downtime_last_hour += 60
-                elif timestamp[0].hour < current_time.hour:
-                    # Store has been in downtime in the last hour
-                    downtime_last_hour += 60
-                    downtime_last_day += (datetime.combine(date.today(),
-                                                           business_hours[str(timestamp_day)][1]) - datetime.combine(
-                        date.today(), timestamp_time)).seconds / 3600
-                    downtime_last_week += (datetime.combine(date.today(),
-                                                            business_hours[str(timestamp_day)][1]) - datetime.combine(
-                        date.today(), timestamp_time)).seconds / 3600
+                else:
+                    if timestamp[0].hour == current_time.hour:
+                        # Store is in downtime for the current hour
+                        downtime_last_hour += 60
+                    elif timestamp[0].hour < current_time.hour:
+                        # Store has been in downtime in the last hour
+                        downtime_last_hour += 60
+                        downtime_last_day += (datetime.combine(date.today(),
+                                                               business_hours[str(timestamp_day)][
+                                                                   1]) - datetime.combine(
+                            date.today(), timestamp_time)).seconds / 3600
+                        downtime_last_week += (datetime.combine(date.today(),
+                                                                business_hours[str(timestamp_day)][
+                                                                    1]) - datetime.combine(
+                            date.today(), timestamp_time)).seconds / 3600
         else:
             if timestamp[0].hour == current_time.hour:
                 if (datetime.combine(date.today(), current_time) - datetime.combine(date.today(),
                                                                                     timestamp_time)).seconds // 60 \
-                                                                                    <= 60:
+                        <= 60:
                     downtime_last_hour += (datetime.combine(date.today(), current_time) -
                                            datetime.combine(date.today(),
-                                           timestamp_time)).seconds // 60
+                                                            timestamp_time)).seconds // 60
             if timestamp_day == current_day:
                 if timestamp[1] == 'active':
                     downtime_last_day += (datetime.combine(date.today(), timestamp_time) - datetime.combine(
@@ -153,24 +153,13 @@ def compute_uptime_downtime(store_id):
                                                          business_hours[str(timestamp_day)][1]) - datetime.combine(
                         date.today(), timestamp_time)).seconds / 3600
                 else:
-                    downtime_last_day += (datetime.combine(date.today(),
-                                                           business_hours[str(timestamp_day)][1]) - datetime.combine(
-                        date.today(), business_hours[str(timestamp_day)][0])).seconds / 3600
-            if one_day_ago <= timestamp_day <= current_day:
-                if timestamp[1] == 'active':
-                    downtime_last_week += (datetime.combine(date.today(), timestamp_time) - datetime.combine(
-                        date.today(), business_hours[str(timestamp_day)][1])).seconds / 3600
-                    uptime_last_week += (datetime.combine(date.today(),
-                                                          business_hours[str(timestamp_day)][1]) - datetime.combine(
-                        date.today(), timestamp_time)).seconds / 3600
-                else:
                     downtime_last_week += (datetime.combine(date.today(),
                                                             business_hours[str(timestamp_day)][1]) - datetime.combine(
                         date.today(), business_hours[str(timestamp_day)][0])).seconds / 3600
 
-    return {'store_id': store_id, 'uptime_last_hour': uptime_last_hour, 'uptime_last_day': uptime_last_day,
-            'uptime_last_week': uptime_last_week, 'downtime_last_hour': downtime_last_hour,
-            'downtime_last_day': downtime_last_day, 'downtime_last_week': downtime_last_week}
+        return {'store_id': store_id, 'uptime_last_hour': uptime_last_hour, 'uptime_last_day': uptime_last_day,
+                'uptime_last_week': uptime_last_week, 'downtime_last_hour': downtime_last_hour,
+                'downtime_last_day': downtime_last_day, 'downtime_last_week': downtime_last_week}
 
 
 def create_csv(report_id):
@@ -178,11 +167,11 @@ def create_csv(report_id):
     data = []
     for store in stores:
         store_data = compute_uptime_downtime(store)
-        store_data['store_id'] = store
         data.append(store_data)
 
     file_name = f"report_{report_id}.csv"
-    fieldnames = ['report_id', 'store_id', 'uptime_last_hour', 'uptime_last_day', 'uptime_last_week', 'downtime_last_hour', 'downtime_last_day',
+    fieldnames = ['report_id', 'store_id', 'uptime_last_hour', 'uptime_last_day', 'uptime_last_week',
+                  'downtime_last_hour', 'downtime_last_day',
                   'downtime_last_week']
     try:
         # Write the data to the CSV file
@@ -203,4 +192,3 @@ def create_csv(report_id):
         return file_name
     else:
         return "Error"
-
